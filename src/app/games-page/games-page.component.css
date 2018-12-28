@@ -1,0 +1,113 @@
+#gamesContainer
+{
+    width: 100%;
+}
+
+.loadingGif
+{
+    display: block;
+    margin: auto;
+    width: 500px;
+}
+
+#cardsContainer
+{
+    width: 100%;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+}
+.gameCard
+{
+    margin-top: 25px;
+    display: block;
+    width: 440px;
+    height: 500px;
+    background-color: white;
+    background-color: #F2F2F2;
+    box-shadow: 0 4px 8px 0 rgba(0, 0, 0, 0.2);
+}
+.gameCard:first-of-type
+{
+    margin-top: 0px;
+}
+
+.winningTeamSquare
+{
+    width: 50%;
+    height: 40%;
+    float: left;
+    background-color: #4D5FFF;
+    text-align: center;
+    color: white;
+}
+
+.losingTeamSquare
+{
+    height: 40%;
+    width: 50%;
+    float: left;
+    background-color: #FF4D4D;
+    text-align: center;
+    color: white;
+}
+
+.teamLogo
+{
+    display: block;
+    height: 40%;
+    margin-left: auto;
+    margin-right: auto;
+    margin-top: 10px;
+    margin-bottom: 10px;
+    clear: both;
+}
+
+.teamName
+{
+    font-size: 18px;
+}
+.teamPoints
+{
+    font-size: 50px;
+}
+.playerColumn
+{
+    width: 50%;
+    height: 60%;
+    float: left;
+}
+.playerContainer
+{
+    height: 20%;
+    background-color: #F2F2F2;
+    border: 1px solid black;
+}
+
+.playerNameContainer
+{
+    width: 70%;
+    height: 100%;
+    float: left;
+    display: flex;
+    align-items: center;
+}
+.playerPointsContainer
+{
+    width: 30%;
+    height: 100%;
+    float: left;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.playerContainer span
+{
+    margin-left: 10px;
+}
+
+.playerPointsContainer span
+{
+    font-size: 20px;
+}

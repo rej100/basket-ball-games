@@ -30,6 +30,7 @@ class team
     shortName: string;
     fullName: string;
     retardedName: string;
+    teamLogoURL: string;
 }
 
 class game
@@ -38,22 +39,198 @@ class game
     losingTeam: team;
     draw: boolean;
     redditLink: string;
+    date: Date;
 }
 
-function wait(ms)
+var gameLinksAndDates = [];
+var NBATeams =
+[
+    "Atlanta Hawks",
+    "Boston Celtics",
+    "Brooklyn Nets",
+    "Charlotte Hornets",
+    "Chicago Bulls",
+    "Cleveland Cavaliers",
+    "Dallas Mavericks",
+    "Denver Nuggets",
+    "Detroit Pistons",
+    "Golden State Warriors",
+    "Houston Rockets",
+    "Indiana Pacers",
+    "Los Angeles Clippers",
+    "Los Angeles Lakers",
+    "Memphis Grizzlies",
+    "Miami Heat",
+    "Milwaukee Bucks",
+    "Minnesota Timberwolves",
+    "New Orleans Pelicans",
+    "New York Knicks",
+    "Oklahoma City Thunder",
+    "Orlando Magic",
+    "Philadelphia 76ers",
+    "Phoenix Suns",
+    "Portland Trail Blazers",
+    "Sacramento Kings",
+    "San Antonio Spurs",
+    "Toronto Raptors",
+    "Utah Jazz",
+    "Washington Wizards",
+]
+
+function getTeamLogoURL(teamName: string, debugBool: boolean)
 {
-var d = new Date();
-var d2 = null;
-do { d2 = new Date(); }
-while(d2-d < ms);
+    if(debugBool)
+    {
+        return "https://i.imgur.com/lb8oNvM.png";
+    }
+    else
+    {
+        return "https://i.imgur.com/ywZ2ItT.png"
+    }
 }
 
+function convertTeamName(teamName: string)
+{
+    let fullName = "";
+    teamName = teamName.toUpperCase();
+    NBATeams.forEach(team =>
+        {
+            if(team.substring(0,4).toUpperCase().includes(teamName) && teamName.length < 4)
+            {
+                //console.log(team + "   " + teamName);
+                fullName = team;
+            }
+            else if(team.toUpperCase().includes(teamName) && teamName.length > 3)
+            {
+                fullName = team;
+            }
+            else if(teamName === "LAC")
+            {
+                fullName = "Los Angeles Clippers";
+            }
+            else if(teamName === "NYK")
+            {
+                fullName = "New York Knicks";
+            }
+            else if(teamName === "LAL")
+            {
+                fullName = "Los Angeles Lakers";
+            }
+            else if(teamName === "BKN")
+            {
+                fullName = "Brooklyn Nets";
+            }
+            else if(teamName === "NOP")
+            {
+                fullName = "New Orleans Pelicans";
+            }
+            else if(teamName === "SAS")
+            {
+                fullName = "San Antonio Spurs";
+            }
+            else if(teamName === "PHX")
+            {
+                fullName = "Phoenix Suns";
+            }
+            else if(teamName === "OKC")
+            {
+                fullName = "Oklahoma City Thunder";
+            }
+            else if(teamName === "GSW")
+            {
+                fullName = "Golden State Warriors";
+            }
+        });
+    return fullName;
+}
 
-export function thingg(searchTerm: string, searchLimit: number, sortBy: string, after: string)
+export function scrapeGames(searchTerm: string, searchLimit: number, sortBy: string, after: string, callback)
 {
     getGames(searchTerm, searchLimit, sortBy, after, (games) =>
     {
-        console.log(games);
+        for(let i = 0; i < games.length; ++i)
+        {
+            if(games[i].draw == undefined || games[i].draw == true)
+            {
+                games.splice(i, 1);
+                i = 0;
+            }
+        }
+        for(let i = 0; i < gameLinksAndDates.length; ++i)
+        {
+            var tempDate = new Date();
+            tempDate.setTime(gameLinksAndDates[i].date * 1000);
+            //console.log(gameLinksAndDates[i].date);
+            //console.log(tempDate);
+            gameLinksAndDates[i].date = tempDate
+            //console.log(gameLinksAndDates[i].date);
+        }
+
+        for(let i = 0; i < games.length; ++i)
+        {   
+            //console.log(games[i].redditLink);
+            for(let j = 0; j < gameLinksAndDates.length; ++j)
+            {
+                //console.log();
+                if(games[i].redditLink.includes(gameLinksAndDates[j].link))
+                {
+                    games[i].date = gameLinksAndDates[j].date;
+                }
+            }
+        }
+        
+        games.sort(function(a, b)
+        {
+            a = a.date
+            b = b.date
+            return a>b ? -1 : a<b ? 1 : 0;
+        });
+
+        for(let i = 0; i < games.length; ++i)
+        {   
+            games[i].winningTeam.players.sort(function(a, b)
+            {
+                a = a.points
+                b = b.points
+                return a>b ? -1 : a<b ? 1 : 0;
+            });
+            games[i].losingTeam.players.sort(function(a, b)
+            {
+                a = a.points
+                b = b.points
+                return a>b ? -1 : a<b ? 1 : 0;
+            });
+        }
+
+        for(let i = 0; i < games.length; ++i)
+        {   
+            if(games[i].winningTeam.shortName !== undefined)
+            {
+                games[i].winningTeam.fullName = convertTeamName(games[i].winningTeam.shortName);
+            }
+            else if(games[i].winningTeam.retardedName !== undefined)
+            {
+                games[i].winningTeam.fullName = convertTeamName(games[i].winningTeam.retardedName);
+            }
+
+            if(games[i].losingTeam.shortName !== undefined)
+            {
+                games[i].losingTeam.fullName = convertTeamName(games[i].losingTeam.shortName);
+            }
+            else if(games[i].losingTeam.retardedName !== undefined)
+            {
+                games[i].losingTeam.fullName = convertTeamName(games[i].losingTeam.retardedName);
+            }
+
+            games[i].winningTeam.teamLogoURL = getTeamLogoURL("", true);
+            games[i].losingTeam.teamLogoURL = getTeamLogoURL("", false);
+
+        }
+
+        //console.log(gameLinksAndDates);
+        //console.log(games);
+        callback(games);
+        
     });
 }
 
@@ -106,9 +283,11 @@ function getGameLinks(searchTerm: string, searchLimit: number, sortBy: string, a
         afterr = data.data.after;
         data.data.children.forEach(element =>
         {
-            if(element.data.title.includes("Post Game Thread"))
+            if(element.data.title.includes("Game Thread]"))
             {
+                var tempObj = {link: element.data.url, date: element.data.created_utc};
                 gameLinks.push(element.data.url);
+                gameLinksAndDates.push(tempObj);
                 //console.log(element.data.url);
             }
         });
@@ -131,7 +310,7 @@ function getHTML(url, callback)
     //const url = "https://example.com"; // site that doesn’t send Access-Control-*
     fetch(proxyurl + url) // https://cors-anywhere.herokuapp.com/https://example.com
     .then(response => response.text())
-    .then(contents => {callback(contents)});
+    .then(contents => {callback(contents)}).catch(err => console.log("wtf: " + err));
 }
 
 function getMinutes(minutesString: string)
@@ -632,8 +811,7 @@ function getStatsFromGame(link: string, callback)
         }
 
         var divTable = $(div).find("table")
-        var divTableLength = divTable.length;
-        //onsole.log(div);
+        //console.log(div);
         //console.log(divTable);
         //console.log("tablel: " + divTableLength);
         //console.log(link); // 3 '12 9 11
